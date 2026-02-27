@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>فرم ثبت اطلاعات</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; }
+    label { display: block; margin: 12px 0 4px; }
+    input, textarea, button { width: 100%; padding: 10px; margin: 6px 0; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+    button { background: #229ed9; color: white; border: none; cursor: pointer; font-size: 16px; }
+    #result { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h2>ثبت اطلاعات</h2>
+
+<form id="myForm">
+  <label for="name">نام و نام خانوادگی</label>
+  <input type="text" id="name" required />
+
+  <label for="phone">شماره موبایل</label>
+  <input type="tel" id="phone" required pattern="[0-9]{11}" placeholder="0912xxxxxxx" />
+
+  <label for="info">اطلاعات اضافی (اختیاری)</label>
+  <textarea id="info" rows="4"></textarea>
+
+  <button type="submit">ارسال</button>
+</form>
+
+<div id="result"></div>
+
+<script>
+  document.getElementById("myForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name  = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const info  = document.getElementById("info").value.trim();
+
+    if (!name || !phone) {
+      document.getElementById("result").style.color = "red";
+      document.getElementById("result").innerHTML = "لطفاً نام و شماره موبایل را وارد کنید";
+      return;
+    }
+
+    const message = `کاربر جدید:\nنام: ${name}\nموبایل: \( {phone} \){info ? `\nتوضیح: ${info}` : ""}`;
+
+    const proxyUrl = "https://api.pawan.krd";
+    const apiUrl = `${proxyUrl}/bot8660854617:AAG316GEy8CWyCoExgGTUofadls2yQHS3zc/sendMessage`;
+
+    try {
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: -1003790727362,
+          text: message,
+          parse_mode: "HTML"
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.ok) {
+        document.getElementById("result").style.color = "green";
+        document.getElementById("result").innerHTML = "اطلاعات با موفقیت ارسال شد!";
+        document.getElementById("myForm").reset();
+      } else {
+        throw new Error(data.description || "خطا از سمت تلگرام");
+      }
+    } catch (err) {
+      document.getElementById("result").style.color = "red";
+      document.getElementById("result").innerHTML = "خطا در ارسال! لطفاً بعداً امتحان کنید.";
+      console.error(err);
+    }
+  });
+</script>
+
+</body>
+</html>
